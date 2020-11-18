@@ -1,7 +1,10 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'maven-publish'
+    id 'com.github.dcendents.android-maven'
 }
+group='com.github.stevepham'
 
 android {
     compileSdkVersion 30
@@ -35,6 +38,32 @@ android {
         jvmTarget = '1.8'
     }
 
+}
+
+def githubProps = new Properties()
+githubProps.load(new FileInputStream(rootProject.file("github.properties")))
+def getVersionName = { -> return "0.1"}
+def getArtificatId = { -> return "keyboard"}
+
+publishing {
+    publications {
+        bar(MavenPublication) {
+            groupId 'com.ht117.keyboard'
+            artifactId getArtificatId()
+            version getVersionName()
+            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPakcages"
+            url = uri("https://maven.pkg.github.com/stevepham/keypod")
+            credentials {
+                username = githubProps['gpr.usr']?: System.getenv("GPR_USER")
+                password = githubProps['gpr.key']?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
 }
 
 dependencies {
